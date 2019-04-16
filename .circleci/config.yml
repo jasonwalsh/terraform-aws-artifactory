@@ -1,0 +1,61 @@
+jobs:
+  build:
+    docker:
+      - image: quay.io/jasonwalsh/circleci-terraform
+    steps:
+      - checkout
+      - restore_cache:
+          key: githooks-{{ checksum ".pre-commit-config.yaml" }}
+      - run: pre-commit install
+      - save_cache:
+          key: githooks-{{ checksum ".pre-commit-config.yaml" }}
+          paths:
+            - .git
+  test:
+    docker:
+      - image: quay.io/jasonwalsh/circleci-terraform
+    steps:
+      - checkout
+      - restore_cache:
+          key: githooks-{{ checksum ".pre-commit-config.yaml" }}
+      - restore_cache:
+          key: Gopkg-{{ checksum "Gopkg.lock" }}
+      - run: pre-commit run --all-files
+      - run: dep ensure
+      - run: go test ./...
+      - save_cache:
+          key: Gopkg-{{ checksum "Gopkg.lock" }}
+          paths:
+            - vendor
+    working_directory: /go/src/github.com/jasonwalsh/terraform-aws-artifactory
+
+  release:
+    docker:
+      - image: circleci/node:10.15.3
+    steps:
+      - checkout
+      - restore_cache:
+          key: npm-cache
+      - run: |
+          npm install @semantic-release/changelog -D
+          npm install @semantic-release/git -D
+      - run: npx semantic-release@15
+      - save_cache:
+          key: npm-cache
+          paths:
+            - node_modules
+version: 2
+workflows:
+  build-test:
+    jobs:
+      - build
+      - test:
+          requires:
+            - build
+      - release:
+          filters:
+            branches:
+              only: master
+          requires:
+            - test
+  version: 2

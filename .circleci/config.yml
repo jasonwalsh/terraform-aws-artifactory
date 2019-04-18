@@ -46,7 +46,7 @@ jobs:
             - node_modules
 version: 2
 workflows:
-  build-test:
+  build-test-release:
     jobs:
       - build
       - test:

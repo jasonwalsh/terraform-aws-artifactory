@@ -22,7 +22,7 @@ jobs:
           key: Gopkg-{{ checksum "Gopkg.lock" }}
       - run: pre-commit run --all-files
       - run: dep ensure
-      - run: go test ./...
+      - run: go test -timeout 45m -v ./...
       - save_cache:
           key: Gopkg-{{ checksum "Gopkg.lock" }}
           paths:

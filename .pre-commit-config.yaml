@@ -2,7 +2,8 @@
 
 repos:
   - hooks:
-      - id: go-fmt
+      - exclude: vendor
+        id: go-fmt
 
       - exclude: vendor
         id: go-lint

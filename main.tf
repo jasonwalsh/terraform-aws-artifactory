@@ -33,6 +33,7 @@ module "autoscaling" {
   max_size                    = "${var.max_size}"
   min_size                    = "${var.min_size}"
   name                        = "${var.autoscaling_group_name}"
+  user_data                   = "${file("${path.module}/templates/user-data.txt.tpl")}"
   vpc_zone_identifier         = "${local.vpc_zone_identifier}"
 }
 

@@ -31,18 +31,23 @@ After specifying the required inputs, invoke the following commands:
 
 | Name | Description | Type | Default | Required |
 |------|-------------|:----:|:-----:|:-----:|
+| allow\_ssh | Whether the user can use SSH | string | `"false"` | no |
 | associate\_public\_ip\_address | Specifies whether to assign a public IP address to each instance | string | `"false"` | no |
 | autoscaling\_group\_name | The name of the Auto Scaling group | string | `"artifactory"` | no |
 | cidr\_block | The IPv4 network range for the VPC, in CIDR notation | string | n/a | yes |
+| create\_key\_pair | Creates a 2048-bit RSA key pair with the specified name | string | `"false"` | no |
 | create\_nat\_gateway | Creates a NAT gateway in the specified public subnet | string | `"true"` | no |
 | create\_vpc | Creates a VPC with the specified IPv4 CIDR block | string | `"true"` | no |
 | desired\_capacity | The number of EC2 instances that should be running in the group | string | `""` | no |
+| enable\_bastion | Create the bastion host | string | `"false"` | no |
 | enable\_dns\_hostnames | Indicates whether the instances launched in the VPC get DNS hostnames | string | `"true"` | no |
 | health\_check\_type | The service to use for the health checks | string | `"EC2"` | no |
 | instance\_type | The instance type of the EC2 instance | string | n/a | yes |
+| key\_name | The name of the key pair | string | `""` | no |
 | map\_public\_ip\_on\_launch | Indicates whether instances launched in this subnet receive a public IPv4 address | string | `"false"` | no |
 | max\_size | The maximum size of the group | string | n/a | yes |
 | min\_size | The minimum size of the group | string | n/a | yes |
+| vpc\_id | The ID of the VPC | string | `""` | no |
 | vpc\_zone\_identifier | A comma-separated list of subnet IDs for your virtual private cloud (VPC) | list | `[]` | no |
 
 ## Outputs

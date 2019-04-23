@@ -1,9 +1,14 @@
 package test
 
 import (
+	"strings"
 	"testing"
+	"time"
 
 	"github.com/gruntwork-io/terratest/modules/aws"
+	"github.com/gruntwork-io/terratest/modules/random"
+	"github.com/gruntwork-io/terratest/modules/retry"
+	"github.com/gruntwork-io/terratest/modules/ssh"
 	"github.com/gruntwork-io/terratest/modules/terraform"
 	test_structure "github.com/gruntwork-io/terratest/modules/test-structure"
 	"github.com/stretchr/testify/assert"
@@ -15,26 +20,37 @@ import (
 // prevent incurring any additional costs.
 func TestArtifactoryAutoScalingGroup(t *testing.T) {
 	region := aws.GetRandomStableRegion(t, nil, nil)
+	keyPair := aws.CreateAndImportEC2KeyPair(t, region, random.UniqueId())
 	options := &terraform.Options{
 		EnvVars: map[string]string{
 			"AWS_DEFAULT_REGION": region,
 		},
 		TerraformDir: "..",
-		VarFiles:     []string{"terraform.tfvars"},
 		Vars: map[string]interface{}{
-			"instance_type": "t2.micro",
+			"allow_ssh":                   true,
+			"associate_public_ip_address": true,
+			"cidr_block":                  "10.0.0.0/16",
+			"create_key_pair":             false,
+			"instance_type":               "t3.medium",
+			"key_name":                    keyPair.Name,
+			"max_size":                    1,
+			"min_size":                    1,
 		},
 	}
-	defer terraform.Destroy(t, options)
+	defer func() {
+		terraform.Destroy(t, options)
+		aws.DeleteEC2KeyPair(t, keyPair)
+	}()
 	test_structure.SaveString(t, "..", "region", region)
 	test_structure.SaveTerraformOptions(t, "..", options)
+	test_structure.SaveEc2KeyPair(t, "..", keyPair)
 	terraform.InitAndApply(t, options)
-	t.Run("A=1", desiredCapacity)
+	t.Run("A=1", DesiredCapacity)
+	t.Run("A=2", ServiceIsRunning)
 }
 
-// desiredCapacity ensures that the current number of instances matches the desired capacity of the group. Since the
-// desired capacity is not defined, it should default to the minimum size of the group.
-func desiredCapacity(t *testing.T) {
+// DesiredCapacity ensures the number of EC2 instances that should be running in the Auto Scaling group.
+func DesiredCapacity(t *testing.T) {
 	options := test_structure.LoadTerraformOptions(t, "..")
 	region := test_structure.LoadString(t, "..", "region")
 	autoScalingGroupName := terraform.Output(t, options, "autoscaling_group_name")
@@ -42,4 +58,25 @@ func desiredCapacity(t *testing.T) {
 	expected := int64(1)
 	actual := response.CurrentCapacity
 	assert.Equal(t, expected, actual)
+}
+
+// ServiceIsRunning ensures the Artifactory service is enabled to start on each boot.
+func ServiceIsRunning(t *testing.T) {
+	options := test_structure.LoadTerraformOptions(t, "..")
+	keyPair := test_structure.LoadEc2KeyPair(t, "..")
+	region := test_structure.LoadString(t, "..", "region")
+	autoScalingGroupName := terraform.Output(t, options, "autoscaling_group_name")
+	instanceIds := aws.GetInstanceIdsForAsg(t, autoScalingGroupName, region)
+	publicIPAddress := aws.GetPublicIpOfEc2Instance(t, instanceIds[0], region)
+	userProfile := ssh.Host{Hostname: publicIPAddress, SshKeyPair: keyPair.KeyPair, SshUserName: "ubuntu"}
+	expected := "active"
+	retry.DoWithRetry(t, "ServiceIsRunning", 60, time.Second, func() (string, error) {
+		actual, err := ssh.CheckSshCommandE(t, userProfile, "/opt/jfrog/artifactory/bin/artifactoryctl check")
+		actual = strings.Replace(actual, "\n", "", -1)
+		if err != nil {
+			return "", err
+		}
+		assert.Equal(t, expected, actual)
+		return "", nil
+	})
 }

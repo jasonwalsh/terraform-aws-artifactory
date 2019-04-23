@@ -207,8 +207,8 @@
   name = "github.com/gruntwork-io/gruntwork-cli"
   packages = ["errors"]
   pruneopts = "UT"
-  revision = "6a2163138f3d10377f313428e7e367b0a6c0c1c9"
-  version = "v0.4.2"
+  revision = "8b5d2a7b141110d9d487eb3eb443f2858819a7e4"
+  version = "v0.4.1"
 
 [[projects]]
   digest = "1:ac498e8c768f57c2fa5b4fc0935522699c7cd743d11a986374079cd25fab91da"
@@ -375,7 +375,7 @@
     "ssh/terminal",
   ]
   pruneopts = "UT"
-  revision = "df01cb2cc480549d72034218dd98bf97671450ac"
+  revision = "d864b10871cd4370fe574816b489c819c675ccc7"
 
 [[projects]]
   branch = "master"
@@ -408,7 +408,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:38915cc39fc79dedca06b483584620781b60fe2aa4e25b3db127ebecc765b15d"
+  digest = "1:45c0985630ebeafc0dba3e5fad8ae79ac344250a0d3517da4abcf7bc25a162b6"
   name = "golang.org/x/sys"
   packages = [
     "cpu",
@@ -416,7 +416,7 @@
     "windows",
   ]
   pruneopts = "UT"
-  revision = "e8e3143a4f4a00f1fafef0dd82ba78223281b01b"
+  revision = "953cdadca894cdc07be76fc99f95b40c28f06623"
 
 [[projects]]
   digest = "1:a2ab62866c75542dd18d2b069fec854577a20211d7c0ea6ae746072a1dccdd18"
@@ -653,6 +653,7 @@
   analyzer-version = 1
   input-imports = [
     "github.com/gruntwork-io/terratest/modules/aws",
+    "github.com/gruntwork-io/terratest/modules/random",
     "github.com/gruntwork-io/terratest/modules/terraform",
     "github.com/gruntwork-io/terratest/modules/test-structure",
     "github.com/stretchr/testify/assert",

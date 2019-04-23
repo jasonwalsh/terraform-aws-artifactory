@@ -24,6 +24,11 @@ variable "map_public_ip_on_launch" {
 }
 
 # Auto Scaling Group Variables
+variable "allow_ssh" {
+  default     = false
+  description = "Whether the user can use SSH"
+}
+
 variable "autoscaling_group_name" {
   default     = "artifactory"
   description = "The name of the Auto Scaling group"
@@ -39,13 +44,28 @@ variable "desired_capacity" {
   description = "The number of EC2 instances that should be running in the group"
 }
 
+variable "enable_bastion" {
+  default     = false
+  description = "Create the bastion host"
+}
+
 variable "health_check_type" {
   default     = "EC2"
   description = "The service to use for the health checks"
 }
 
+variable "create_key_pair" {
+  default     = false
+  description = "Creates a 2048-bit RSA key pair with the specified name"
+}
+
 variable "instance_type" {
   description = "The instance type of the EC2 instance"
+}
+
+variable "key_name" {
+  default     = ""
+  description = "The name of the key pair"
 }
 
 variable "max_size" {
@@ -54,6 +74,11 @@ variable "max_size" {
 
 variable "min_size" {
   description = "The minimum size of the group"
+}
+
+variable "vpc_id" {
+  default     = ""
+  description = "The ID of the VPC"
 }
 
 variable "vpc_zone_identifier" {

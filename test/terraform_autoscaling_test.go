@@ -1,11 +1,14 @@
 package test
 
 import (
+	"fmt"
+	"net/http"
 	"strings"
 	"testing"
 	"time"
 
 	"github.com/gruntwork-io/terratest/modules/aws"
+	http_helper "github.com/gruntwork-io/terratest/modules/http-helper"
 	"github.com/gruntwork-io/terratest/modules/random"
 	"github.com/gruntwork-io/terratest/modules/retry"
 	"github.com/gruntwork-io/terratest/modules/ssh"
@@ -47,6 +50,7 @@ func TestArtifactoryAutoScalingGroup(t *testing.T) {
 	terraform.InitAndApply(t, options)
 	t.Run("A=1", DesiredCapacity)
 	t.Run("A=2", ServiceIsRunning)
+	t.Run("A=3", HealthCheck)
 }
 
 // DesiredCapacity ensures the number of EC2 instances that should be running in the Auto Scaling group.
@@ -60,7 +64,7 @@ func DesiredCapacity(t *testing.T) {
 	assert.Equal(t, expected, actual)
 }
 
-// ServiceIsRunning ensures the Artifactory service is enabled to start on each boot.
+// ServiceIsRunning ensures the Artifactory service is running.
 func ServiceIsRunning(t *testing.T) {
 	options := test_structure.LoadTerraformOptions(t, "..")
 	keyPair := test_structure.LoadEc2KeyPair(t, "..")
@@ -68,6 +72,7 @@ func ServiceIsRunning(t *testing.T) {
 	autoScalingGroupName := terraform.Output(t, options, "autoscaling_group_name")
 	instanceIds := aws.GetInstanceIdsForAsg(t, autoScalingGroupName, region)
 	publicIPAddress := aws.GetPublicIpOfEc2Instance(t, instanceIds[0], region)
+	test_structure.SaveString(t, "..", "publicIPAddress", publicIPAddress)
 	userProfile := ssh.Host{Hostname: publicIPAddress, SshKeyPair: keyPair.KeyPair, SshUserName: "ubuntu"}
 	expected := "active"
 	retry.DoWithRetry(t, "ServiceIsRunning", 60, time.Second, func() (string, error) {
@@ -79,4 +84,11 @@ func ServiceIsRunning(t *testing.T) {
 		assert.Equal(t, expected, actual)
 		return "", nil
 	})
+}
+
+// HealthCheck ensures the Artifactory health check is running.
+func HealthCheck(t *testing.T) {
+	publicIPAddress := test_structure.LoadString(t, "..", "publicIPAddress")
+	url := fmt.Sprintf("http://%s:%d/artifactory/api/system/ping", publicIPAddress, 8081)
+	http_helper.HttpGetWithRetry(t, url, http.StatusOK, "OK", 60, time.Second)
 }

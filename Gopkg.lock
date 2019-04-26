@@ -10,7 +10,7 @@
   version = "v0.37.4"
 
 [[projects]]
-  digest = "1:ae5c4e8cf871380a35ab37989430b56e5561c13f6e4e511950582e0b131659c4"
+  digest = "1:e55e2a4016f3a4312a2d3ef4428de62f345f07def7739b5f1a976548558cac6d"
   name = "github.com/aws/aws-sdk-go"
   packages = [
     "aws",
@@ -64,8 +64,8 @@
     "service/sts",
   ]
   pruneopts = "UT"
-  revision = "ca6d5f771b63df153f02fe5b117434d5ebafeeda"
-  version = "v1.19.15"
+  revision = "7e9cd5af6d09680b0f9b3d983432e880425d42e7"
+  version = "v1.19.19"
 
 [[projects]]
   digest = "1:7b94d37d65c0445053c6f3e73090e3966c1c29127035492c349e14f25c440359"
@@ -207,11 +207,11 @@
   name = "github.com/gruntwork-io/gruntwork-cli"
   packages = ["errors"]
   pruneopts = "UT"
-  revision = "8b5d2a7b141110d9d487eb3eb443f2858819a7e4"
-  version = "v0.4.1"
+  revision = "6a2163138f3d10377f313428e7e367b0a6c0c1c9"
+  version = "v0.4.2"
 
 [[projects]]
-  digest = "1:ac498e8c768f57c2fa5b4fc0935522699c7cd743d11a986374079cd25fab91da"
+  digest = "1:34e096a2721af57f7cd52580999028ae4a88ad593260ba7fae0b337ee964f404"
   name = "github.com/gruntwork-io/terratest"
   packages = [
     "modules/aws",
@@ -219,6 +219,7 @@
     "modules/customerrors",
     "modules/environment",
     "modules/files",
+    "modules/http-helper",
     "modules/k8s",
     "modules/logger",
     "modules/packer",
@@ -230,8 +231,8 @@
     "modules/test-structure",
   ]
   pruneopts = "UT"
-  revision = "54393d85e00e2614efa6bd22e963fe174cc128d5"
-  version = "v0.14.6"
+  revision = "57b60477c3c9dd77e8905cf1ed81ad26a2490fbd"
+  version = "v0.15.0"
 
 [[projects]]
   digest = "1:a0cefd27d12712af4b5018dc7046f245e1e3b5760e2e848c30b171b570708f9b"
@@ -297,12 +298,12 @@
   revision = "53be0d36a84c2a886ca057d34b6aa4468df9ccb4"
 
 [[projects]]
-  digest = "1:0e7775ebbcf00d8dd28ac663614af924411c868dca3d5aa762af0fae3808d852"
+  digest = "1:a8c2725121694dfbf6d552fb86fe6b46e3e7135ea05db580c28695b916162aad"
   name = "github.com/peterbourgon/diskv"
   packages = ["."]
   pruneopts = "UT"
-  revision = "5f041e8faa004a95c88a202771f4cc3e991971e6"
-  version = "v2.0.1"
+  revision = "0be1b92a6df0e4f5cb0a5d15fb7f643d0ad93ce6"
+  version = "v3.0.0"
 
 [[projects]]
   digest = "1:0028cb19b2e4c3112225cd871870f2d9cf49b9b4276531f03438a88e94be86fe"
@@ -375,11 +376,11 @@
     "ssh/terminal",
   ]
   pruneopts = "UT"
-  revision = "d864b10871cd4370fe574816b489c819c675ccc7"
+  revision = "a29dc8fdc73485234dbef99ebedb95d2eced08de"
 
 [[projects]]
   branch = "master"
-  digest = "1:8a320ae827e62b4afafc65a60d23382db2bf82327129b4678382b9ebad0941d1"
+  digest = "1:b9bf9ddb713916ca0fe4630b135cc937c81a00378a97083a906c9669d56ab23f"
   name = "golang.org/x/net"
   packages = [
     "context",
@@ -390,7 +391,7 @@
     "idna",
   ]
   pruneopts = "UT"
-  revision = "afa5a82059c6356159f699d81beff22a81842231"
+  revision = "4829fb13d2c62012c17688fa7f629f371014946d"
 
 [[projects]]
   branch = "master"
@@ -408,7 +409,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:45c0985630ebeafc0dba3e5fad8ae79ac344250a0d3517da4abcf7bc25a162b6"
+  digest = "1:91f01f15f85f43f18cbed401dfc839879a12678f8254fcfe93daaddd4a3e52e0"
   name = "golang.org/x/sys"
   packages = [
     "cpu",
@@ -416,16 +417,18 @@
     "windows",
   ]
   pruneopts = "UT"
-  revision = "953cdadca894cdc07be76fc99f95b40c28f06623"
+  revision = "a129542de9ae0895210abff9c95d67a1f33cb93d"
 
 [[projects]]
-  digest = "1:a2ab62866c75542dd18d2b069fec854577a20211d7c0ea6ae746072a1dccdd18"
+  digest = "1:8d8faad6b12a3a4c819a3f9618cb6ee1fa1cfc33253abeeea8b55336721e3405"
   name = "golang.org/x/text"
   packages = [
     "collate",
     "collate/build",
     "internal/colltab",
     "internal/gen",
+    "internal/language",
+    "internal/language/compact",
     "internal/tag",
     "internal/triegen",
     "internal/ucd",
@@ -438,8 +441,8 @@
     "unicode/rangetable",
   ]
   pruneopts = "UT"
-  revision = "f21a4dfb5e38f5895301dc265a8def02365cc3d0"
-  version = "v0.3.0"
+  revision = "342b2e1fbaa52c93f31447ad2c6abc048c63e475"
+  version = "v0.3.2"
 
 [[projects]]
   branch = "master"
@@ -653,7 +656,10 @@
   analyzer-version = 1
   input-imports = [
     "github.com/gruntwork-io/terratest/modules/aws",
+    "github.com/gruntwork-io/terratest/modules/http-helper",
     "github.com/gruntwork-io/terratest/modules/random",
+    "github.com/gruntwork-io/terratest/modules/retry",
+    "github.com/gruntwork-io/terratest/modules/ssh",
     "github.com/gruntwork-io/terratest/modules/terraform",
     "github.com/gruntwork-io/terratest/modules/test-structure",
     "github.com/stretchr/testify/assert",

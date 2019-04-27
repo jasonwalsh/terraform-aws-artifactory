@@ -47,6 +47,7 @@ After specifying the required inputs, invoke the following commands:
 | map\_public\_ip\_on\_launch | Indicates whether instances launched in this subnet receive a public IPv4 address | string | `"false"` | no |
 | max\_size | The maximum size of the group | string | n/a | yes |
 | min\_size | The minimum size of the group | string | n/a | yes |
+| subnets | The IDs of the public subnets | list | `[]` | no |
 | vpc\_id | The ID of the VPC | string | `""` | no |
 | vpc\_zone\_identifier | A comma-separated list of subnet IDs for your virtual private cloud (VPC) | list | `[]` | no |
 
@@ -55,6 +56,7 @@ After specifying the required inputs, invoke the following commands:
 | Name | Description |
 |------|-------------|
 | autoscaling\_group\_name | The name of the Auto Scaling group |
+| dns\_name | The public DNS name of the load balancer |
 
 <!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
 

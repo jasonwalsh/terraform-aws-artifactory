@@ -86,3 +86,10 @@ variable "vpc_zone_identifier" {
   description = "A comma-separated list of subnet IDs for your virtual private cloud (VPC)"
   type        = "list"
 }
+
+# Application Load Balancer Variables
+variable "subnets" {
+  default     = []
+  description = "The IDs of the public subnets"
+  type        = "list"
+}

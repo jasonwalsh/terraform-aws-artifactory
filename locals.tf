@@ -4,7 +4,26 @@ locals {
 
   key_name = "${coalesce(var.key_name, join("", aws_key_pair.key_pair.*.key_name))}"
 
+  # Listener for the specified Application Load Balancer
+  listeners = [
+    {
+      port     = 8081
+      protocol = "HTTP"
+    },
+  ]
+
   private_key = "${join("", tls_private_key.private_key.*.private_key_pem)}"
+
+  # The IDs of the public subnets for the specified Application Load Balancer
+  subnets = "${coalescelist(var.subnets, module.vpc.public_subnets)}"
+
+  target_groups = [
+    {
+      name             = "${var.autoscaling_group_name}"
+      backend_protocol = "HTTP"
+      backend_port     = 8081
+    },
+  ]
 
   vpc_id = "${coalesce(var.vpc_id, module.vpc.vpc_id)}"
 

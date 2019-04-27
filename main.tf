@@ -34,6 +34,27 @@ resource "aws_key_pair" "key_pair" {
   count = "${var.create_key_pair ? 1 : 0}"
 }
 
+module "alb" {
+  source  = "terraform-aws-modules/alb/aws"
+  version = "3.5.0"
+
+  http_tcp_listeners        = ["${local.listeners}"]
+  http_tcp_listeners_count  = "${length(local.listeners)}"
+  load_balancer_is_internal = false
+  load_balancer_name        = "${var.autoscaling_group_name}"
+  logging_enabled           = false                                            # TODO: true
+  security_groups           = ["${module.artifactory.this_security_group_id}"]
+  subnets                   = ["${local.subnets}"]
+  target_groups             = ["${local.target_groups}"]
+  target_groups_count       = "${length(local.target_groups)}"
+
+  target_groups_defaults = {
+    health_check_path = "/artifactory/api/system/ping"
+  }
+
+  vpc_id = "${local.vpc_id}"
+}
+
 module "allow_ssh" {
   source  = "terraform-aws-modules/security-group/aws//modules/ssh"
   version = "2.17.0"
@@ -48,6 +69,8 @@ module "artifactory" {
   source  = "terraform-aws-modules/security-group/aws"
   version = "2.17.0"
 
+  egress_rules = ["all-all"]
+
   ingress_with_cidr_blocks = [
     {
       cidr_blocks = "0.0.0.0/0"
@@ -57,7 +80,7 @@ module "artifactory" {
     },
   ]
 
-  name = "artifactory"
+  name = "${var.autoscaling_group_name}"
 
   vpc_id = "${local.vpc_id}"
 }
@@ -81,6 +104,7 @@ module "autoscaling" {
     "${module.allow_ssh.this_security_group_id}",
   ]
 
+  target_group_arns   = "${module.alb.target_group_arns}"
   user_data           = "${file("${path.module}/templates/user-data.txt.tpl")}"
   vpc_zone_identifier = "${local.vpc_zone_identifier}"
 }
@@ -95,7 +119,7 @@ module "bastion" {
   instance_type               = "t2.micro"
   key_name                    = "${local.key_name}"
   name                        = "${format("%s-bastion", var.autoscaling_group_name)}"
-  subnet_ids                  = ["${module.vpc.public_subnets}"]
+  subnet_ids                  = ["${local.subnets}"]
 
   vpc_security_group_ids = [
     "${module.allow_ssh.this_security_group_id}",

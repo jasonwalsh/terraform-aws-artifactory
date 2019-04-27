@@ -34,7 +34,7 @@ func TestArtifactoryAutoScalingGroup(t *testing.T) {
 			"associate_public_ip_address": true,
 			"cidr_block":                  "10.0.0.0/16",
 			"create_key_pair":             false,
-			"instance_type":               "t3.medium",
+			"instance_type":               "t2.medium",
 			"key_name":                    keyPair.Name,
 			"max_size":                    1,
 			"min_size":                    1,
@@ -48,9 +48,9 @@ func TestArtifactoryAutoScalingGroup(t *testing.T) {
 	test_structure.SaveTerraformOptions(t, "..", options)
 	test_structure.SaveEc2KeyPair(t, "..", keyPair)
 	terraform.InitAndApply(t, options)
-	t.Run("A=1", DesiredCapacity)
-	t.Run("A=2", ServiceIsRunning)
-	t.Run("A=3", HealthCheck)
+	t.Run("A=DesiredCapacity", DesiredCapacity)
+	t.Run("A=ServiceIsRunning", ServiceIsRunning)
+	t.Run("A=HealthCheck", HealthCheck)
 }
 
 // DesiredCapacity ensures the number of EC2 instances that should be running in the Auto Scaling group.
@@ -68,11 +68,10 @@ func DesiredCapacity(t *testing.T) {
 func ServiceIsRunning(t *testing.T) {
 	options := test_structure.LoadTerraformOptions(t, "..")
 	keyPair := test_structure.LoadEc2KeyPair(t, "..")
-	region := test_structure.LoadString(t, "..", "region")
+	region := keyPair.Region
 	autoScalingGroupName := terraform.Output(t, options, "autoscaling_group_name")
 	instanceIds := aws.GetInstanceIdsForAsg(t, autoScalingGroupName, region)
 	publicIPAddress := aws.GetPublicIpOfEc2Instance(t, instanceIds[0], region)
-	test_structure.SaveString(t, "..", "publicIPAddress", publicIPAddress)
 	userProfile := ssh.Host{Hostname: publicIPAddress, SshKeyPair: keyPair.KeyPair, SshUserName: "ubuntu"}
 	expected := "active"
 	retry.DoWithRetry(t, "ServiceIsRunning", 60, time.Second, func() (string, error) {
@@ -88,7 +87,8 @@ func ServiceIsRunning(t *testing.T) {
 
 // HealthCheck ensures the Artifactory health check is running.
 func HealthCheck(t *testing.T) {
-	publicIPAddress := test_structure.LoadString(t, "..", "publicIPAddress")
-	url := fmt.Sprintf("http://%s:%d/artifactory/api/system/ping", publicIPAddress, 8081)
+	options := test_structure.LoadTerraformOptions(t, "..")
+	dnsName := terraform.Output(t, options, "dns_name")
+	url := fmt.Sprintf("http://%s:%d/artifactory/api/system/ping", dnsName, 8081)
 	http_helper.HttpGetWithRetry(t, url, http.StatusOK, "OK", 60, time.Second)
 }

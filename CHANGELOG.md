@@ -1,3 +1,12 @@
+# [1.2.0](https://github.com/jasonwalsh/terraform-aws-artifactory/compare/v1.1.1...v1.2.0) (2019-04-28)
+
+
+### Features
+
+* Add application load balancer ([bc102f0](https://github.com/jasonwalsh/terraform-aws-artifactory/commit/bc102f0))
+* Add Artifactory health check test ([accb250](https://github.com/jasonwalsh/terraform-aws-artifactory/commit/accb250))
+* Install Artifactory using cloud-init ([cd2394d](https://github.com/jasonwalsh/terraform-aws-artifactory/commit/cd2394d))
+
 ## [1.1.1](https://github.com/jasonwalsh/terraform-aws-artifactory/compare/v1.1.0...v1.1.1) (2019-04-19)
 
 

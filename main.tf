@@ -9,7 +9,7 @@ data "aws_availability_zones" "available" {
 data "aws_ami" "ami" {
   filter {
     name   = "name"
-    values = ["*ubuntu-xenial-16.04-amd64-server*"]
+    values = ["amzn2-ami-hvm-*"]
   }
 
   filter {
@@ -18,7 +18,61 @@ data "aws_ami" "ami" {
   }
 
   most_recent = true
-  owners      = ["aws-marketplace"]
+  owners      = ["amazon"]
+}
+
+resource "aws_cloudwatch_log_group" "cloudwatch" {
+  name = "${var.autoscaling_group_name}"
+
+  count = "${var.enable_logging ? 1 : 0}"
+}
+
+# https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/create-cloudwatch-agent-configuration-file.html
+data "template_file" "cloudwatch" {
+  template = "${file("${path.root}/templates/amazon-cloudwatch-agent.json.tpl")}"
+
+  vars = {
+    log_group_name = "${
+      coalesce(join("", aws_cloudwatch_log_group.cloudwatch.*.name), var.autoscaling_group_name)
+    }"
+  }
+}
+
+data "template_file" "cloudinit_config" {
+  template = "${file("${path.root}/templates/user-data.txt.tpl")}"
+
+  vars = {
+    start      = "${var.enable_logging ? "-s" : ""}"
+    cloudwatch = "${base64encode(data.template_file.cloudwatch.rendered)}"
+  }
+}
+
+resource "aws_iam_role" "cloudwatch" {
+  assume_role_policy = <<EOF
+{
+  "Statement": [
+    {
+      "Action": "sts:AssumeRole",
+      "Effect": "Allow",
+      "Principal": {
+        "Service": "ec2.amazonaws.com"
+      },
+      "Sid": ""
+    }
+  ],
+  "Version": "2012-10-17"
+}
+EOF
+}
+
+# https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/create-iam-roles-for-cloudwatch-agent-commandline.html
+resource "aws_iam_role_policy_attachment" "cloudwatch" {
+  policy_arn = "arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy"
+  role       = "${aws_iam_role.cloudwatch.name}"
+}
+
+resource "aws_iam_instance_profile" "iam_instance_profile" {
+  role = "${aws_iam_role.cloudwatch.name}"
 }
 
 resource "tls_private_key" "private_key" {
@@ -42,8 +96,8 @@ module "alb" {
   http_tcp_listeners_count  = "${length(local.listeners)}"
   load_balancer_is_internal = false
   load_balancer_name        = "${var.autoscaling_group_name}"
-  logging_enabled           = false                                            # TODO: true
-  security_groups           = ["${module.artifactory.this_security_group_id}"]
+  logging_enabled           = false                                     # TODO: true
+  security_groups           = ["${module.http.this_security_group_id}"]
   subnets                   = ["${local.subnets}"]
   target_groups             = ["${local.target_groups}"]
   target_groups_count       = "${length(local.target_groups)}"
@@ -92,6 +146,7 @@ module "autoscaling" {
   associate_public_ip_address = "${var.associate_public_ip_address}"
   desired_capacity            = "${local.desired_capacity}"
   health_check_type           = "${var.health_check_type}"
+  iam_instance_profile        = "${aws_iam_instance_profile.iam_instance_profile.name}"
   image_id                    = "${data.aws_ami.ami.id}"
   instance_type               = "${var.instance_type}"
   key_name                    = "${local.key_name}"
@@ -105,7 +160,7 @@ module "autoscaling" {
   ]
 
   target_group_arns   = "${module.alb.target_group_arns}"
-  user_data           = "${file("${path.module}/templates/user-data.txt.tpl")}"
+  user_data           = "${data.template_file.cloudinit_config.rendered}"
   vpc_zone_identifier = "${local.vpc_zone_identifier}"
 }
 
@@ -126,11 +181,20 @@ module "bastion" {
   ]
 }
 
+module "http" {
+  source  = "terraform-aws-modules/security-group/aws//modules/http-80"
+  version = "2.17.0"
+
+  ingress_cidr_blocks = ["0.0.0.0/0"]
+  name                = "HTTP"
+  vpc_id              = "${local.vpc_id}"
+}
+
 resource "null_resource" "bastion" {
   connection {
     host        = "${module.bastion.public_dns}"
     private_key = "${local.private_key}"
-    user        = "ubuntu"
+    user        = "ec2-user"
   }
 
   provisioner "remote-exec" {

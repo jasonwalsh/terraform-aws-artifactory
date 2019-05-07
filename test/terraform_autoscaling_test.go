@@ -3,6 +3,7 @@ package test
 import (
 	"fmt"
 	"net/http"
+	"regexp"
 	"strings"
 	"testing"
 	"time"
@@ -48,9 +49,10 @@ func TestArtifactoryAutoScalingGroup(t *testing.T) {
 	test_structure.SaveTerraformOptions(t, "..", options)
 	test_structure.SaveEc2KeyPair(t, "..", keyPair)
 	terraform.InitAndApply(t, options)
-	t.Run("A=DesiredCapacity", DesiredCapacity)
-	t.Run("A=ServiceIsRunning", ServiceIsRunning)
-	t.Run("A=HealthCheck", HealthCheck)
+	t.Run("Autoscaling=DesiredCapacity", DesiredCapacity)
+	t.Run("Artifactory=ServiceIsRunning", ServiceIsRunning)
+	t.Run("Artifactory=HealthCheck", HealthCheck)
+	t.Run("Artifactory=DescribeLogStreams", DescribeLogStreams)
 }
 
 // DesiredCapacity ensures the number of EC2 instances that should be running in the Auto Scaling group.
@@ -72,7 +74,7 @@ func ServiceIsRunning(t *testing.T) {
 	autoScalingGroupName := terraform.Output(t, options, "autoscaling_group_name")
 	instanceIds := aws.GetInstanceIdsForAsg(t, autoScalingGroupName, region)
 	publicIPAddress := aws.GetPublicIpOfEc2Instance(t, instanceIds[0], region)
-	userProfile := ssh.Host{Hostname: publicIPAddress, SshKeyPair: keyPair.KeyPair, SshUserName: "ubuntu"}
+	userProfile := ssh.Host{Hostname: publicIPAddress, SshKeyPair: keyPair.KeyPair, SshUserName: "ec2-user"}
 	expected := "active"
 	retry.DoWithRetry(t, "ServiceIsRunning", 60, time.Second, func() (string, error) {
 		actual, err := ssh.CheckSshCommandE(t, userProfile, "/opt/jfrog/artifactory/bin/artifactoryctl check")
@@ -89,6 +91,14 @@ func ServiceIsRunning(t *testing.T) {
 func HealthCheck(t *testing.T) {
 	options := test_structure.LoadTerraformOptions(t, "..")
 	dnsName := terraform.Output(t, options, "dns_name")
-	url := fmt.Sprintf("http://%s:%d/artifactory/api/system/ping", dnsName, 8081)
+	url := fmt.Sprintf("http://%s/artifactory/api/system/ping", dnsName)
 	http_helper.HttpGetWithRetry(t, url, http.StatusOK, "OK", 60, time.Second)
+}
+
+// DescribeLogStreams ensures the Artifactory service started in the CloudWatch logs.
+func DescribeLogStreams(t *testing.T) {
+	region := test_structure.LoadString(t, "..", "region")
+	logGroupName, logStreamName := "artifactory", "artifactory.log"
+	logs := aws.GetCloudWatchLogEntries(t, region, logStreamName, logGroupName)
+	assert.Regexp(t, regexp.MustCompile(".*Artifactory successfully started.*"), strings.Join(logs, "\n"))
 }

@@ -30,3 +30,4 @@ override.tf.json
 
 # Folder used to store temporary test data by Terratest
 .test-data
+id_rsa

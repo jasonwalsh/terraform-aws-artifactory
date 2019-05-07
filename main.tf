@@ -82,6 +82,23 @@ resource "tls_private_key" "private_key" {
   count = "${var.create_key_pair ? 1 : 0}"
 }
 
+resource "local_file" "private_key" {
+  filename          = "${path.root}/id_rsa"
+  sensitive_content = "${join("", tls_private_key.private_key.*.private_key_pem)}"
+
+  count = "${var.create_key_pair ? 1 : 0}"
+
+  provisioner "local-exec" {
+    command = "chmod 0400 ${self.filename}"
+  }
+
+  provisioner "local-exec" {
+    command = "rm -f ${self.filename}"
+
+    when = "destroy"
+  }
+}
+
 resource "aws_key_pair" "key_pair" {
   public_key = "${join("", tls_private_key.private_key.*.public_key_openssh)}"
 

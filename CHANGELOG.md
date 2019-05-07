@@ -1,3 +1,10 @@
+# [1.3.0](https://github.com/jasonwalsh/terraform-aws-artifactory/compare/v1.2.0...v1.3.0) (2019-05-07)
+
+
+### Features
+
+* Add support for enabling logging ([e3333cb](https://github.com/jasonwalsh/terraform-aws-artifactory/commit/e3333cb))
+
 # [1.2.0](https://github.com/jasonwalsh/terraform-aws-artifactory/compare/v1.1.1...v1.2.0) (2019-04-28)
 
 

@@ -41,6 +41,7 @@ After specifying the required inputs, invoke the following commands:
 | desired\_capacity | The number of EC2 instances that should be running in the group | string | `""` | no |
 | enable\_bastion | Create the bastion host | string | `"false"` | no |
 | enable\_dns\_hostnames | Indicates whether the instances launched in the VPC get DNS hostnames | string | `"true"` | no |
+| enable\_logging | Enable CloudWatch Logs | string | `"true"` | no |
 | health\_check\_type | The service to use for the health checks | string | `"EC2"` | no |
 | instance\_type | The instance type of the EC2 instance | string | n/a | yes |
 | key\_name | The name of the key pair | string | `""` | no |

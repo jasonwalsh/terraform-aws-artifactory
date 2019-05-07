@@ -49,6 +49,11 @@ variable "enable_bastion" {
   description = "Create the bastion host"
 }
 
+variable "enable_logging" {
+  default     = true
+  description = "Enable CloudWatch Logs"
+}
+
 variable "health_check_type" {
   default     = "EC2"
   description = "The service to use for the health checks"

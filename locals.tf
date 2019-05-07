@@ -7,7 +7,7 @@ locals {
   # Listener for the specified Application Load Balancer
   listeners = [
     {
-      port     = 8081
+      port     = 80
       protocol = "HTTP"
     },
   ]
@@ -21,7 +21,7 @@ locals {
     {
       name             = "${var.autoscaling_group_name}"
       backend_protocol = "HTTP"
-      backend_port     = 8081
+      backend_port     = 8081                            # Artifactory HTTP port
     },
   ]
 

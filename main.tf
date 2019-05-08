@@ -35,6 +35,8 @@ data "template_file" "cloudwatch" {
     log_group_name = "${
       coalesce(join("", aws_cloudwatch_log_group.cloudwatch.*.name), var.autoscaling_group_name)
     }"
+
+    namespace = "${var.autoscaling_group_name}"
   }
 }
 

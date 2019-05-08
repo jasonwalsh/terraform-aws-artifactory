@@ -47,6 +47,7 @@
         ],
         "metrics_collection_interval": 60
       }
-    }
+    },
+    "namespace": "${namespace}"
   }
 }

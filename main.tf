@@ -162,16 +162,17 @@ module "autoscaling" {
   source  = "terraform-aws-modules/autoscaling/aws"
   version = "2.9.1"
 
-  associate_public_ip_address = "${var.associate_public_ip_address}"
-  desired_capacity            = "${local.desired_capacity}"
-  health_check_type           = "${var.health_check_type}"
-  iam_instance_profile        = "${aws_iam_instance_profile.iam_instance_profile.name}"
-  image_id                    = "${data.aws_ami.ami.id}"
-  instance_type               = "${var.instance_type}"
-  key_name                    = "${local.key_name}"
-  max_size                    = "${var.max_size}"
-  min_size                    = "${var.min_size}"
-  name                        = "${var.autoscaling_group_name}"
+  associate_public_ip_address  = "${var.associate_public_ip_address}"
+  desired_capacity             = "${local.desired_capacity}"
+  health_check_type            = "${var.health_check_type}"
+  iam_instance_profile         = "${aws_iam_instance_profile.iam_instance_profile.name}"
+  image_id                     = "${data.aws_ami.ami.id}"
+  instance_type                = "${var.instance_type}"
+  key_name                     = "${local.key_name}"
+  max_size                     = "${var.max_size}"
+  min_size                     = "${var.min_size}"
+  name                         = "${var.autoscaling_group_name}"
+  recreate_asg_when_lc_changes = true
 
   security_groups = [
     "${module.artifactory.this_security_group_id}",

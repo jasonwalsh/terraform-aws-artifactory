@@ -1,3 +1,10 @@
+# [1.5.0](https://github.com/jasonwalsh/terraform-aws-artifactory/compare/v1.4.0...v1.5.0) (2019-05-08)
+
+
+### Features
+
+* Add namespace to CloudWatch configuration ([ab27e37](https://github.com/jasonwalsh/terraform-aws-artifactory/commit/ab27e37))
+
 # [1.4.0](https://github.com/jasonwalsh/terraform-aws-artifactory/compare/v1.3.0...v1.4.0) (2019-05-07)
 
 

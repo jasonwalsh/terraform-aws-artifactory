@@ -22,7 +22,7 @@ write_files:
 yum_repos:
   bintray-jfrog-artifactory-pro-rpms:
     baseurl: https://jfrog.bintray.com/artifactory-pro-rpms
-    enabled: 1
-    gpgcheck: 0
+    enabled: true
+    gpgcheck: false
     name: bintray--jfrog-artifactory-pro-rpms
-    repo_gpgcheck: 0
+    repo_gpgcheck: false

@@ -44,8 +44,9 @@ data "template_file" "cloudinit_config" {
   template = "${file("${path.root}/templates/user-data.txt.tpl")}"
 
   vars = {
-    start      = "${var.enable_logging ? "-s" : ""}"
-    cloudwatch = "${base64encode(data.template_file.cloudwatch.rendered)}"
+    artifactory = "${base64encode(data.template_file.db.rendered)}"
+    cloudwatch  = "${base64encode(data.template_file.cloudwatch.rendered)}"
+    start       = "${var.enable_logging ? "-s" : ""}"
   }
 }
 
@@ -115,8 +116,8 @@ module "alb" {
   http_tcp_listeners_count  = "${length(local.listeners)}"
   load_balancer_is_internal = false
   load_balancer_name        = "${var.autoscaling_group_name}"
-  logging_enabled           = false                                     # TODO: true
-  security_groups           = ["${module.http.this_security_group_id}"]
+  logging_enabled           = false                                        # TODO: true
+  security_groups           = ["${module.sg_http.this_security_group_id}"]
   subnets                   = ["${local.subnets}"]
   target_groups             = ["${local.target_groups}"]
   target_groups_count       = "${length(local.target_groups)}"
@@ -138,7 +139,7 @@ module "allow_ssh" {
   vpc_id              = "${local.vpc_id}"
 }
 
-module "artifactory" {
+module "sg_artifactory" {
   source  = "terraform-aws-modules/security-group/aws"
   version = "2.17.0"
 
@@ -153,8 +154,7 @@ module "artifactory" {
     },
   ]
 
-  name = "${var.autoscaling_group_name}"
-
+  name   = "${var.autoscaling_group_name}"
   vpc_id = "${local.vpc_id}"
 }
 
@@ -175,7 +175,7 @@ module "autoscaling" {
   recreate_asg_when_lc_changes = true
 
   security_groups = [
-    "${module.artifactory.this_security_group_id}",
+    "${module.sg_artifactory.this_security_group_id}",
     "${module.allow_ssh.this_security_group_id}",
   ]
 
@@ -201,7 +201,7 @@ module "bastion" {
   ]
 }
 
-module "http" {
+module "sg_http" {
   source  = "terraform-aws-modules/security-group/aws//modules/http-80"
   version = "2.17.0"
 
@@ -235,6 +235,56 @@ resource "null_resource" "bastion" {
   count = "${var.enable_bastion ? 1 : 0}"
 }
 
+# If the user does not specify a password for the database, then generate a random string to be used as the password.
+resource "random_string" "master_user_password" {
+  length  = 8
+  special = false
+
+  count = "${var.master_user_password == "" ? 1 : 0}"
+}
+
+module "sg_rds" {
+  source  = "terraform-aws-modules/security-group/aws"
+  version = "2.17.0"
+
+  ingress_with_cidr_blocks = [
+    {
+      cidr_blocks = "0.0.0.0/0"
+      from_port   = "${var.port}"
+      protocol    = "TCP"
+      to_port     = "${var.port}"
+    },
+  ]
+
+  name   = "${var.engine}"
+  vpc_id = "${local.vpc_id}"
+}
+
+module "rds" {
+  source  = "terraform-aws-modules/rds/aws"
+  version = "1.28.0"
+
+  allocated_storage       = "${var.allocated_storage}"
+  backup_retention_period = "${var.backup_retention_period}"
+  backup_window           = ""
+
+  engine               = "${var.engine}"
+  engine_version       = "${var.engine_version}"
+  family               = "${var.db_parameter_group_family}"
+  identifier           = "${var.autoscaling_group_name}"
+  instance_class       = "${var.db_instance_class}"
+  maintenance_window   = "${var.preferred_maintenance_window}"
+  major_engine_version = "${var.major_engine_version}"
+
+  # The name of the database to create when the DB instance is created.
+  name                   = "artdb"
+  password               = "${coalesce(var.master_user_password, join("", random_string.master_user_password.*.result))}"
+  port                   = "${var.port}"
+  subnet_ids             = "${local.vpc_zone_identifier}"
+  username               = "artifactory"
+  vpc_security_group_ids = ["${module.sg_rds.this_security_group_id}"]
+}
+
 module "vpc" {
   source  = "terraform-aws-modules/vpc/aws"
   version = "1.60.0"
@@ -256,4 +306,15 @@ module "vpc" {
     "${cidrsubnet(var.cidr_block, 8, 4)}",
     "${cidrsubnet(var.cidr_block, 8, 5)}",
   ]
+}
+
+data "template_file" "db" {
+  template = "${file("${path.root}/templates/mysql.properties.tpl")}"
+
+  vars = {
+    database = "${module.rds.this_db_instance_name}"
+    hosts    = "${join(",", list(module.rds.this_db_instance_address))}"
+    password = "${module.rds.this_db_instance_password}"
+    user     = "${module.rds.this_db_instance_username}"
+  }
 }

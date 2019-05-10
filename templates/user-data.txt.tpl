@@ -19,6 +19,12 @@ write_files:
     path: /opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.json
     permissions: 0644
 
+  - content: ${artifactory}
+    encoding: b64
+    owner: root:root
+    path: /opt/jfrog/artifactory/etc/db.properties
+    permissions: 0644
+
 yum_repos:
   bintray-jfrog-artifactory-pro-rpms:
     baseurl: https://jfrog.bintray.com/artifactory-pro-rpms

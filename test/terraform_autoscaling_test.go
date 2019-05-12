@@ -35,6 +35,7 @@ func TestArtifactoryAutoScalingGroup(t *testing.T) {
 			"associate_public_ip_address": true,
 			"cidr_block":                  "10.0.0.0/16",
 			"create_key_pair":             false,
+			"db_instance_class":           "db.t2.micro",
 			"instance_type":               "t2.medium",
 			"key_name":                    keyPair.Name,
 			"max_size":                    1,

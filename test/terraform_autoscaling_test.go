@@ -35,6 +35,7 @@ func TestArtifactoryAutoScalingGroup(t *testing.T) {
 			"associate_public_ip_address": true,
 			"cidr_block":                  "10.0.0.0/16",
 			"create_key_pair":             false,
+			"db_instance_class":           "db.t2.micro",
 			"instance_type":               "t2.medium",
 			"key_name":                    keyPair.Name,
 			"max_size":                    1,
@@ -76,7 +77,7 @@ func ServiceIsRunning(t *testing.T) {
 	publicIPAddress := aws.GetPublicIpOfEc2Instance(t, instanceIds[0], region)
 	userProfile := ssh.Host{Hostname: publicIPAddress, SshKeyPair: keyPair.KeyPair, SshUserName: "ec2-user"}
 	expected := "active"
-	retry.DoWithRetry(t, "ServiceIsRunning", 60, time.Second, func() (string, error) {
+	retry.DoWithRetry(t, "ServiceIsRunning", 300, time.Second, func() (string, error) {
 		actual, err := ssh.CheckSshCommandE(t, userProfile, "/opt/jfrog/artifactory/bin/artifactoryctl check")
 		actual = strings.Replace(actual, "\n", "", -1)
 		if err != nil {
@@ -92,7 +93,7 @@ func HealthCheck(t *testing.T) {
 	options := test_structure.LoadTerraformOptions(t, "..")
 	dnsName := terraform.Output(t, options, "dns_name")
 	url := fmt.Sprintf("http://%s/artifactory/api/system/ping", dnsName)
-	http_helper.HttpGetWithRetry(t, url, http.StatusOK, "OK", 60, time.Second)
+	http_helper.HttpGetWithRetry(t, url, http.StatusOK, "OK", 300, time.Second)
 }
 
 // DescribeLogStreams ensures the Artifactory service started in the CloudWatch logs.

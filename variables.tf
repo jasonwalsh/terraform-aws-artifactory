@@ -98,3 +98,53 @@ variable "subnets" {
   description = "The IDs of the public subnets"
   type        = "list"
 }
+
+# Relational Database Service Variables
+variable "allocated_storage" {
+  default     = 20
+  description = "The amount of storage (in gibibytes) to allocate for the DB instance"
+}
+
+variable "backup_retention_period" {
+  default     = 1
+  description = "The number of days for which automated backups are retained. Setting this parameter to a positive number enables backups. Setting this parameter to 0 disables automated backups"
+}
+
+variable "db_instance_class" {
+  description = "The compute and memory capacity of the DB instance"
+}
+
+variable "db_parameter_group_family" {
+  default     = "mysql5.7"
+  description = "The DB parameter group family name"
+}
+
+variable "engine" {
+  default     = "mysql"
+  description = "The name of the database engine to be used for this instance"
+}
+
+variable "engine_version" {
+  default     = "5.7.25"
+  description = "The version number of the database engine to use"
+}
+
+variable "major_engine_version" {
+  default     = "5.7"
+  description = "Specifies the major version of the engine that this option group should be associated with"
+}
+
+variable "master_user_password" {
+  default     = ""
+  description = "The password for the master user"
+}
+
+variable "port" {
+  default     = 3306
+  description = "The port number on which the database accepts connections"
+}
+
+variable "preferred_maintenance_window" {
+  default     = ""
+  description = "The time range each week during which system maintenance can occur, in Universal Coordinated Time (UTC)"
+}

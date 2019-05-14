@@ -1,3 +1,10 @@
+# [1.6.0](https://github.com/jasonwalsh/terraform-aws-artifactory/compare/v1.5.0...v1.6.0) (2019-05-14)
+
+
+### Features
+
+* Deploy new ASG if launch config changes ([789e4f8](https://github.com/jasonwalsh/terraform-aws-artifactory/commit/789e4f8))
+
 # [1.5.0](https://github.com/jasonwalsh/terraform-aws-artifactory/compare/v1.4.0...v1.5.0) (2019-05-08)
 
 

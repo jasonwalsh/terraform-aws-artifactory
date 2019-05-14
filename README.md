@@ -1,4 +1,4 @@
-[![CircleCI](https://img.shields.io/circleci/project/github/jasonwalsh/terraform-aws-artifactory.svg?style=flat-square)](https://circleci.com/gh/jasonwalsh/terraform-aws-artifactory) [![GitHub Release](https://img.shields.io/github/release/jasonwalsh/terraform-aws-artifactory.svg?style=flat-square)](https://github.com/jasonwalsh/terraform-aws-artifactory/releases/latest)
+[![CircleCI branch](https://img.shields.io/circleci/project/github/jasonwalsh/terraform-aws-artifactory/master.svg?style=flat-square)](https://circleci.com/gh/jasonwalsh/terraform-aws-artifactory) [![GitHub Release](https://img.shields.io/github/release/jasonwalsh/terraform-aws-artifactory.svg?style=flat-square)](https://github.com/jasonwalsh/terraform-aws-artifactory/releases/latest)
 
 > A module for provisioning Artifactory resources in AWS using Terraform
 
